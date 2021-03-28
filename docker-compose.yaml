@@ -1,0 +1,18 @@
+version: '3'
+
+services:  
+
+  db:
+    build: database
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  application:
+    build: application/
+    ports:
+      - 5000:5000
+    depends_on:
+      - db
