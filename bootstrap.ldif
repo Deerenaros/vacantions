@@ -25,19 +25,19 @@ sn: 01
 
 # Entry 3: cn=Bot2 012,ou=customs,dc=example,dc=org
 dn: cn=Bot2 012,ou=customs,dc=example,dc=org
-cn: Bot2 012
-givenname: Bot2
+cn: Bot 02
+givenname: Bot
 objectclass: inetOrgPerson
 objectclass: top
-sn: 012
+sn: 02
 
-# Entry 4: cn=vesnin uruy,ou=customs,dc=example,dc=org
-dn: cn=vesnin uruy,ou=customs,dc=example,dc=org
-cn: vesnin uruy
-givenname: vesnin
+# Entry 4: cn=vesnin yuri,ou=customs,dc=example,dc=org
+dn: cn=vesnin yuri,ou=customs,dc=example,dc=org
+cn: yuri vesnin
+givenname: yuri
 mail: hui@ru
 objectclass: inetOrgPerson
 objectclass: top
-sn: uruy
+sn: vesnin
 userpassword: {MD5}4fV7VeE0+UMCyqApbEQgCQ==
 

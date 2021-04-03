@@ -87,8 +87,10 @@ try:
             if result_type == ldap.RES_SEARCH_ENTRY:
                 result_set.append(result_data)
     print(result_set)
-    user = User(first_name=result_set[0], mid_name="", last_name=result_set[1])
-    db.session.add(user)
+    for entry in result_set[1:]:
+        print(entry)
+        user = User(first_name=entry[0][1]["givenName"][0].decode("utf-8"), mid_name="", last_name=entry[0][1]["sn"][0].decode("utf-8"))
+        db.session.add(user)
 except ldap.LDAPError as e:
     import traceback
     traceback.print_tb(e)
@@ -100,6 +102,11 @@ except ldap.LDAPError as e:
 
 db.session.commit()
 
+@app.route("/<int:id>", methods=["GET"])
+def removevacation(id):
+    Vacation.query.filter_by(id=id).delete()
+    db.session.commit()
+    return redirect("/")
 
 @app.route("/", methods=["GET"])
 def index():
@@ -124,7 +131,7 @@ def index():
     for user in User.query.all():
         result += f"<h3>{repr(user)}</h3>"
         for vac in user.vacantions:
-            result += f"<p>from {vac.leave} to {vac.retrn}</p>"
+            result += f"<p>from {vac.leave} to {vac.retrn} <a href='/{vac.id}'>X</a></p>"
 
     return result
 
