@@ -4,3 +4,5 @@ psycopg2
 loguru
 names
 python-ldap
+requests
+uwsgi
