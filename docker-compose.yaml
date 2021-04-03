@@ -12,7 +12,33 @@ services:
 
   application:
     build: application/
+    environment:
+      DBNAME: db
+      DBHOST: db
+      DBUSER: user
+      DBPSWD: user
+      LDAPURI: ldap://ldap
+      LDAPBASE: ou=customs,dc=example,dc=org
+      LDAPBIND: cn=admin,dc=example,dc=org
+      LDAPPSWD: admin
     ports:
       - 5000:5000
     depends_on:
       - db
+      - ldap
+
+  # for testing purposes ldap will be here
+  ldap:
+    image: osixia/openldap:1.5.0
+    volumes: 
+      - ./bootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/50-bootstrap.ldif:rw
+    command: --copy-service
+
+  # GUI for ldap server
+  phpldap:
+    image: osixia/phpldapadmin:0.9.0
+    environment:
+      PHPLDAPADMIN_HTTPS: "false"
+      PHPLDAPADMIN_LDAP_HOSTS: ldap
+    ports:
+      - 8080:80

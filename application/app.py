@@ -4,9 +4,44 @@ from sqlalchemy.orm import relationship, backref
 from loguru import logger
 from datetime import date, datetime
 import names
+import time
+import psycopg2
+import os
+import ldap
+
+dbname = os.environ.get("DBNAME", "db")
+dbhost = os.environ.get("DBHOST", "db")
+dbuser = os.environ.get("DBUSER", "user")
+dbpswd = os.environ.get("DBPSWD", "user")
+dbdrvr = os.environ.get("dbdrvr", "postgresql+psycopg2")
+
+ldapuri = os.environ.get("LDAPURI")
+ldapbase = os.environ.get("LDAPBASE")
+ldapbind = os.environ.get("LDAPBIND")
+ldappswd = os.environ.get("LDAPPSWD")
+
+
+def postgres_test():
+    try:
+        conn = psycopg2.connect(f"dbname='{dbname}' user='{dbuser}' host='{dbhost}' password='{dbpswd}' connect_timeout=1")
+        conn.close()
+        return True
+    except:
+        return False
+
+tries = 0
+while not postgres_test():
+    time.sleep(1)
+    if (tries := tries + 1) > 10:
+        raise Exception("No database connection available")
+
+ldap_conn = ldap.initialize(ldapuri)
+ldap_conn.simple_bind_s(ldapbind, ldappswd)
+
+
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://user:user@db/db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f"{dbdrvr}://{dbuser}:{dbpswd}@{dbhost}/{dbname}"
 db = SQLAlchemy(app)
 
 class Vacation(db.Model):
@@ -31,13 +66,37 @@ class User(db.Model):
     def __str__(self):
         return '%s %s %s' % (self.first_name, self.mid_name, self.last_name)
 
+
 db.drop_all()
 db.create_all()
 
-for i in range(0, 500):
-    logger.error(i)
-    user = User(first_name=names.get_first_name(), mid_name=names.get_first_name(gender='male'), last_name=names.get_last_name())
+
+searchFilter = "(objectClass=*)"
+searchAttribute = ["givenname","sn"]
+searchScope = ldap.SCOPE_SUBTREE
+ldaprslt = ldap_conn.search(ldapbase, searchScope, searchFilter, searchAttribute)
+
+try:
+    ldap_result_id = ldap_conn.search(ldapbase, searchScope, searchFilter, searchAttribute)
+    result_set = []
+    while 1:
+        result_type, result_data = ldap_conn.result(ldap_result_id, 0)
+        if (result_data == []):
+            break
+        else:
+            if result_type == ldap.RES_SEARCH_ENTRY:
+                result_set.append(result_data)
+    print(result_set)
+    user = User(first_name=result_set[0], mid_name="", last_name=result_set[1])
     db.session.add(user)
+except ldap.LDAPError as e:
+    import traceback
+    traceback.print_tb(e)
+
+#for i in range(0, 50):
+#    logger.error(i)
+#    user = User(first_name=names.get_first_name(), mid_name=names.get_first_name(gender='male'), last_name=names.get_last_name())
+#    db.session.add(user)
 
 db.session.commit()
 

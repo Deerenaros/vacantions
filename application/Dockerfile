@@ -5,7 +5,8 @@ ENV FLASK_APP=app.py
 
 
 RUN mkdir -p /opt/app
-RUN python -m pip install flask flask_sqlalchemy psycopg2 loguru names
+RUN apt-get update && apt-get install -y libldap2-dev libsasl2-dev libssl-dev
+RUN python -m pip install flask flask_sqlalchemy psycopg2 loguru names python-ldap
 WORKDIR /opt/app
 ADD . ./
 
