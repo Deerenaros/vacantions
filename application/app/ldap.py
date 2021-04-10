@@ -1,10 +1,12 @@
 import ldap
 import os
 
+from loguru import logger
+
 from .db import db, User
 
 
-def init(): 
+def init(app): 
     ldapuri = os.environ.get("LDAPURI")
     ldapbase = os.environ.get("LDAPBASE")
     ldapbind = os.environ.get("LDAPBIND")
@@ -29,11 +31,11 @@ def init():
                     result_set.append(result_data)
         print(result_set)
         for entry in result_set[1:]:
-            print(entry)
+            logger.success(entry)
             user = User(first_name=entry[0][1]["givenName"][0].decode("utf-8"), mid_name="", last_name=entry[0][1]["sn"][0].decode("utf-8"))
-            db.session.add(user)
+            with app.app_context():
+                db.session.add(user)
+                db.session.commit()
     except ldap.LDAPError as e:
         import traceback
         traceback.print_tb(e)
-
-    db.session.commit()

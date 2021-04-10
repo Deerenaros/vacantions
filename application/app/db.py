@@ -5,9 +5,9 @@ db = SQLAlchemy()
 
 from .model import *
 
-
 def init(app):
-    from utils import postgres_test
+    import time
+    from .utils import postgres_test
 
     dbname = os.environ.get("DBNAME", "db")
     dbhost = os.environ.get("DBHOST", "db")
@@ -23,6 +23,6 @@ def init(app):
 
     app.config['SQLALCHEMY_DATABASE_URI'] = f"{dbdrvr}://{dbuser}:{dbpswd}@{dbhost}/{dbname}"
     db.init_app(app)
-
-    db.drop_all()
-    db.create_all()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()

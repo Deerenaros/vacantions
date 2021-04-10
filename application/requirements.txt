@@ -5,4 +5,4 @@ loguru
 names
 python-ldap
 requests
-uwsgi
+gevent

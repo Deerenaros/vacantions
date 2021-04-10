@@ -1,10 +1,8 @@
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, render_template
 from sqlalchemy.orm import relationship, backref
 from loguru import logger
 from datetime import date, datetime
-import names
 import time
-import psycopg2
 import os
 
 from .model import *
@@ -19,30 +17,7 @@ def init(app):
 
     @app.route("/", methods=["GET"])
     def index():
-        users = "<datalist id='users'>\n"
-        for user in User.query.all():
-            users += f"<option value='{user}'>\n"
-        users += "</datalist>\n"
-
-        result = f"""
-        <form action="/" method="post">
-            <input list="users" name="names" placeholder="Input Names Here">
-
-            {users}
-
-            <label for="leave">Leave date:</label>
-            <input type="date" name="leave" id="leave" min="2021-01-01" max="2021-12-31">
-            <label for="return">Return date:</label>
-            <input type="date" name="return" id="return" min="2021-01-01" max="2021-12-31">
-            <input type="submit">
-        </form>
-        """
-        for user in User.query.all():
-            result += f"<h3>{repr(user)}</h3>"
-            for vac in user.vacantions:
-                result += f"<p>from {vac.leave} to {vac.retrn} <a href='/{vac.id}'>X</a></p>"
-
-        return result
+        return render_template("index.j2", users=User.query.all())
 
     @app.route("/", methods=["POST"])
     def post():

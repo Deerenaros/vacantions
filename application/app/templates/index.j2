@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Nothing</title>
+    </head>
+    <body>
+        <form action="/" method="post">
+            <input list="users" name="names" placeholder="Input Names Here">
+
+            <datalist id='users'>
+                {% for user in users %}
+                for user in User.query.all():
+                    <option value='{{ user }}'>
+                {% endfor %}
+            </datalist>
+
+            <label for="leave">Leave date:</label>
+            <input type="date" name="leave" id="leave" min="2021-01-01" max="2021-12-31">
+            <label for="return">Return date:</label>
+            <input type="date" name="return" id="return" min="2021-01-01" max="2021-12-31">
+            <input type="submit">
+        </form>
+        {% for user in users %}
+            <h3>{{ user }}</h3>
+            {% for vac in user.vacantions %}
+                <p>from {{ vac.leave }} to {{ vac.retrn }} <a href='/{{ vac.id }}'>X</a></p>
+            {% endfor %}
+        {% endfor %}
+    </body>
+</html>
